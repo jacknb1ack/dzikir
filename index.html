@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Dzikir Counter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  :root {
+    --bg: #0F0F14;
+    --surface: #1A1A24;
+    --surface2: #22222E;
+    --gold: #C8A96E;
+    --gold-dim: #8B7340;
+    --gold-glow: rgba(200, 169, 110, 0.15);
+    --gold-glow2: rgba(200, 169, 110, 0.08);
+    --teal: #4A9E8E;
+    --text: #E8E8E8;
+    --text2: #999;
+    --text3: #555;
+    --danger: #C25050;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  .arabic {
+    font-family: 'Amiri', serif;
+    direction: rtl;
+    line-height: 2.2;
+    font-size: 1.5rem;
+  }
+
+  .latin {
+    font-style: italic;
+    color: var(--text2);
+    font-size: 0.85rem;
+    line-height: 1.6;
+    direction: ltr;
+  }
+
+  /* ===== SCREENS ===== */
+  .screen {
+    display: none;
+    min-height: 100dvh;
+    flex-direction: column;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  .screen.active {
+    display: flex;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    min-height: 44px;
+  }
+  .header-btn {
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-size: 1.2rem;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .header-btn:hover { background: var(--gold-glow); }
+  .header-title {
+    font-size: 0.9rem;
+    color: var(--text2);
+    font-weight: 500;
+  }
+
+  /* ===== HOME ===== */
+  .home-logo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .home-logo .moon {
+    font-size: 3rem;
+    color: var(--gold);
+    filter: drop-shadow(0 0 20px var(--gold-glow));
+  }
+  .home-logo h1 {
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: 2px;
+  }
+  .home-logo p {
+    color: var(--text3);
+    font-size: 0.8rem;
+  }
+
+  .home-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 40px;
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    color: #1a1a1a;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-gold:active { transform: scale(0.97); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--gold);
+    border: 1.5px solid var(--gold-dim);
+    padding: 14px 32px;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-outline:active { background: var(--gold-glow); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1.5px solid var(--danger);
+    padding: 14px 32px;
+    border-radius: 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .btn-small {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+  }
+
+  /* ===== DOA SCREEN ===== */
+  .doa-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .doa-title {
+    color: var(--gold);
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+  .doa-card {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  .doa-card .arabic {
+    margin-bottom: 16px;
+  }
+  .doa-footer {
+    padding: 20px 0;
+    width: 100%;
+  }
+  .doa-footer .btn-gold {
+    width: 100%;
+  }
+
+  /* ===== COUNTER SCREEN ===== */
+  .counter-screen {
+    padding: 10px 20px;
+    position: relative;
+  }
+  .counter-dzikir-text {
+    text-align: center;
+    padding: 10px 0;
+  }
+  .counter-dzikir-text .arabic {
+    font-size: 2rem;
+    color: var(--gold);
+    filter: drop-shadow(0 0 10px var(--gold-glow));
+  }
+  .counter-dzikir-text .latin {
+    font-size: 0.9rem;
+  }
+
+  .set-badge {
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  .set-badge-inner {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: 12px;
+    padding: 8px 20px;
+    text-align: center;
+  }
+  .set-badge-label {
+    font-size: 0.65rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .set-badge-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--teal);
+  }
+
+  /* Main tap area */
+  .counter-tap-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    min-height: 300px;
+  }
+
+  .counter-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 3px solid var(--gold);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.1s;
+    box-shadow: 0 0 30px var(--gold-glow), inset 0 0 30px var(--gold-glow2);
+  }
+  .counter-circle.tapped {
+    transform: scale(0.96);
+    border-color: #E8C878;
+    box-shadow: 0 0 50px var(--gold-glow), inset 0 0 40px var(--gold-glow);
+  }
+  .counter-circle .count-now {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+  }
+  .counter-circle .count-target {
+    font-size: 1.1rem;
+    color: var(--text3);
+    font-weight: 400;
+  }
+
+  .tap-hint {
+    margin-top: 20px;
+    font-size: 0.7rem;
+    color: var(--text3);
+    letter-spacing: 1px;
+  }
+
+  /* Ripple */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: var(--gold-glow);
+    animation: rippleAnim 0.6s ease-out forwards;
+    pointer-events: none;
+  }
+  @keyframes rippleAnim {
+    from { width: 0; height: 0; opacity: 0.5; }
+    to { width: 300px; height: 300px; opacity: 0; margin-left: -150px; margin-top: -150px; }
+  }
+
+  /* Progress bar */
+  .progress-container {
+    padding: 15px 0 10px;
+  }
+  .progress-bar-bg {
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .progress-text {
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text3);
+    margin-top: 6px;
+  }
+
+  /* ===== OVERLAY ===== */
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  }
+  .overlay.active {
+    display: flex;
+  }
+  .overlay-card {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: 20px;
+    padding: 30px 24px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+  }
+  .overlay-card h3 {
+    color: var(--teal);
+    font-weight: 500;
+    margin-bottom: 6px;
+    font-size: 1rem;
+  }
+  .overlay-card .checkmark {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  .overlay-card .btn-gold {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  /* ===== PAUSE OVERLAY ===== */
+  .pause-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+    color: var(--text2);
+  }
+  .pause-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  /* ===== SETTINGS ===== */
+  .settings-section {
+    margin-bottom: 24px;
+  }
+  .settings-section h3 {
+    color: var(--gold);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+  .settings-card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .setting-row label {
+    font-size: 0.85rem;
+    color: var(--text2);
+    flex-shrink: 0;
+  }
+  .setting-row input[type="number"] {
+    width: 80px;
+    background: var(--surface2);
+    border: 1px solid var(--text3);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 0.9rem;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+  }
+  .setting-row input[type="number"]:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  textarea.setting-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--text3);
+    border-radius: 10px;
+    padding: 12px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: 'Amiri', serif;
+    direction: rtl;
+    min-height: 80px;
+    resize: vertical;
+    line-height: 2;
+  }
+  textarea.setting-textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  textarea.setting-textarea-latin {
+    font-family: 'Inter', sans-serif;
+    direction: ltr;
+    font-style: italic;
+    font-size: 0.85rem;
+    min-height: 60px;
+    line-height: 1.5;
+  }
+
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .toggle {
+    width: 48px;
+    height: 26px;
+    border-radius: 13px;
+    background: var(--text3);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle.on { background: var(--gold); }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 22px; height: 22px;
+    background: white;
+    border-radius: 50%;
+    top: 2px; left: 2px;
+    transition: transform 0.2s;
+  }
+  .toggle.on::after { transform: translateX(22px); }
+
+  /* ===== SHOLAWAT SELECTOR ===== */
+  .sholawat-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0;
+    width: 100%;
+  }
+  .sholawat-option {
+    background: var(--surface);
+    border: 1.5px solid var(--surface2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: right;
+  }
+  .sholawat-option.selected {
+    border-color: var(--gold);
+    background: var(--gold-glow);
+  }
+  .sholawat-option h4 {
+    color: var(--text);
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+    text-align: left;
+  }
+  .sholawat-option .arabic {
+    font-size: 1.1rem;
+    line-height: 2;
+  }
+
+  /* ===== FINISH SCREEN ===== */
+  .finish-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    text-align: center;
+  }
+  .finish-content .star {
+    font-size: 3rem;
+    color: var(--gold);
+    filter: drop-shadow(0 0 20px var(--gold-glow));
+  }
+  .finish-content h2 {
+    font-weight: 300;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+  }
+  .finish-content .subtitle {
+    color: var(--gold);
+    font-size: 1rem;
+    font-style: italic;
+  }
+  .finish-stats {
+    color: var(--text3);
+    font-size: 0.85rem;
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* ===== DOA HAJAT TEXTAREA ===== */
+  .doa-hajat-area {
+    width: 100%;
+    max-width: 400px;
+  }
+  .doa-hajat-area textarea {
+    width: 100%;
+    min-height: 150px;
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: 14px;
+    padding: 20px;
+    color: var(--text);
+    font-family: 'Amiri', serif;
+    font-size: 1.3rem;
+    direction: rtl;
+    line-height: 2.2;
+    resize: vertical;
+  }
+  .doa-hajat-area textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+  .doa-hajat-hint {
+    font-size: 0.75rem;
+    color: var(--text3);
+    margin-top: 8px;
+    text-align: center;
+  }
+
+  /* Scrollable content */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 20px;
+  }
+
+  /* Confirm dialog */
+  .confirm-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
+  }
+
+  /* Keep screen awake hint */
+  .awake-hint {
+    font-size: 0.65rem;
+    color: var(--text3);
+    text-align: center;
+    padding: 4px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SCREEN: HOME ============ -->
+<div id="screen-home" class="screen active">
+  <div class="header">
+    <div></div>
+    <div class="header-title"></div>
+    <div></div>
+  </div>
+  <div class="home-logo">
+    <div class="moon">☽</div>
+    <h1>Dzikir</h1>
+    <p>Counter &amp; Tracker</p>
+  </div>
+  <div id="resume-section" style="display:none; margin-bottom: 16px;">
+    <div class="doa-card" style="text-align:center;">
+      <p style="color:var(--teal); font-weight:500; margin-bottom:8px;">Dzikir belum selesai</p>
+      <p style="color:var(--text2); font-size:0.85rem;" id="resume-info"></p>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-top:14px;">
+        <button class="btn-gold btn-small" onclick="resumeDzikir()">▶ Lanjutkan</button>
+        <button class="btn-outline btn-small" onclick="confirmRestart()">↺ Mulai Ulang</button>
+      </div>
+    </div>
+  </div>
+  <div class="home-buttons">
+    <button class="btn-gold" onclick="startNew()">▶ Mulai Dzikir</button>
+    <button class="btn-outline" onclick="showScreen('screen-settings')">⚙ Pengaturan</button>
+  </div>
+</div>
+
+<!-- ============ SCREEN: DOA PEMBUKA ============ -->
+<div id="screen-doa-pembuka" class="screen">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('screen-home')">←</button>
+    <div class="header-title">Doa Pembuka</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="doa-content">
+    <div class="doa-title">✦ Doa Pembuka ✦</div>
+    <div class="doa-card">
+      <div class="arabic" id="doa-pembuka-arabic"></div>
+      <div class="latin" id="doa-pembuka-latin"></div>
+    </div>
+  </div>
+  <div class="doa-footer">
+    <button class="btn-gold" onclick="startCounter()">Lanjut ▶</button>
+  </div>
+</div>
+
+<!-- ============ SCREEN: MAIN COUNTER ============ -->
+<div id="screen-counter" class="screen counter-screen">
+  <div class="header">
+    <button class="header-btn" onclick="pauseDzikir()">⏸</button>
+    <div class="header-title" id="counter-step-label">Dzikir</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="counter-dzikir-text">
+    <div class="arabic" id="counter-arabic"></div>
+    <div class="latin" id="counter-latin"></div>
+  </div>
+  <div class="set-badge">
+    <div class="set-badge-inner">
+      <div class="set-badge-label">SET</div>
+      <div class="set-badge-value" id="set-display">0/129</div>
+    </div>
+  </div>
+  <div class="counter-tap-area" id="tap-area">
+    <div class="counter-circle" id="counter-circle">
+      <div class="count-now" id="count-display">0</div>
+      <div class="count-target" id="count-target">/129</div>
+    </div>
+    <div class="tap-hint">TAP UNTUK MENGHITUNG</div>
+  </div>
+  <div class="progress-container">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-text" id="progress-text">0%</div>
+  </div>
+</div>
+
+<!-- ============ OVERLAY: ANTAR SET ============ -->
+<div id="overlay-set" class="overlay">
+  <div class="overlay-card">
+    <div class="checkmark">✓</div>
+    <h3 id="set-complete-title">Set 1 Selesai!</h3>
+    <p style="font-size:0.8rem; color:var(--text3); margin-bottom:14px;">Baca 1×:</p>
+    <div class="arabic" style="font-size:1.2rem;" id="antar-set-arabic"></div>
+    <div class="latin" id="antar-set-latin"></div>
+    <button class="btn-gold" onclick="nextSet()">Lanjut ▶</button>
+  </div>
+</div>
+
+<!-- ============ OVERLAY: PAUSE ============ -->
+<div id="overlay-pause" class="overlay">
+  <div class="overlay-card">
+    <h3 style="color:var(--gold); font-size:1.2rem;">⏸ Dijeda</h3>
+    <div class="pause-stats" id="pause-stats"></div>
+    <div class="pause-buttons">
+      <button class="btn-gold" onclick="closePause()">▶ Lanjutkan</button>
+      <button class="btn-outline" onclick="goHome()">🏠 Ke Beranda</button>
+      <button class="btn-danger btn-small" id="btn-reset-all" onclick="showResetConfirm()">↺ Ulang Semua</button>
+      <div id="reset-confirm" style="display:none;">
+        <p style="color:var(--danger); font-size:0.8rem; margin-bottom:8px;">⚠ Yakin ulang dari awal?</p>
+        <div class="confirm-row">
+          <button class="btn-danger btn-small" onclick="resetAll()">Ya, Ulang</button>
+          <button class="btn-outline btn-small" onclick="hideResetConfirm()">Tidak</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SCREEN: DOA HAJAT ============ -->
+<div id="screen-doa-hajat" class="screen">
+  <div class="header">
+    <div style="width:40px;"></div>
+    <div class="header-title">Doa Hajat</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="doa-content">
+    <div class="doa-title">🤲 Doa Hajat 🤲</div>
+    <div class="doa-hajat-area">
+      <textarea id="doa-hajat-display" placeholder="Ketik doa hajat Anda di sini..." readonly></textarea>
+      <div class="doa-hajat-hint">Doa bisa diedit di Pengaturan</div>
+    </div>
+  </div>
+  <div class="doa-footer">
+    <button class="btn-gold" onclick="startSholawat()">Lanjut ▶</button>
+  </div>
+</div>
+
+<!-- ============ SCREEN: SHOLAWAT SELECTOR ============ -->
+<div id="screen-sholawat-select" class="screen">
+  <div class="header">
+    <div style="width:40px;"></div>
+    <div class="header-title">Pilih Sholawat</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="scroll-content">
+    <p style="text-align:center; color:var(--text2); font-size:0.85rem; margin-bottom:16px;">Pilih sholawat yang ingin dibaca:</p>
+    <div class="sholawat-selector" id="sholawat-list"></div>
+  </div>
+  <div class="doa-footer">
+    <button class="btn-gold" onclick="beginSholawatCounter()">Mulai ▶</button>
+  </div>
+</div>
+
+<!-- ============ SCREEN: SHOLAWAT COUNTER ============ -->
+<div id="screen-sholawat-counter" class="screen counter-screen">
+  <div class="header">
+    <button class="header-btn" onclick="pauseDzikir()">⏸</button>
+    <div class="header-title">Sholawat</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="counter-dzikir-text">
+    <div class="arabic" id="sholawat-counter-arabic" style="font-size:1.2rem;"></div>
+    <div class="latin" id="sholawat-counter-latin"></div>
+  </div>
+  <div class="counter-tap-area" id="sholawat-tap-area">
+    <div class="counter-circle" id="sholawat-circle">
+      <div class="count-now" id="sholawat-count-display">0</div>
+      <div class="count-target" id="sholawat-count-target">/11</div>
+    </div>
+    <div class="tap-hint">TAP UNTUK MENGHITUNG</div>
+  </div>
+  <div class="progress-container">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="sholawat-progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-text" id="sholawat-progress-text">0%</div>
+  </div>
+</div>
+
+<!-- ============ SCREEN: FINISH ============ -->
+<div id="screen-finish" class="screen">
+  <div class="header">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  <div class="finish-content">
+    <div class="star">✦</div>
+    <h2>Selesai</h2>
+    <div class="subtitle">Jazākallāhu Khairan</div>
+    <div class="finish-stats" id="finish-stats"></div>
+  </div>
+  <div class="doa-footer">
+    <button class="btn-gold" onclick="goHomeClean()">🏠 Kembali</button>
+  </div>
+</div>
+
+<!-- ============ SCREEN: SETTINGS ============ -->
+<div id="screen-settings" class="screen">
+  <div class="header">
+    <button class="header-btn" onclick="showScreen('screen-home')">←</button>
+    <div class="header-title">Pengaturan</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="scroll-content">
+    <div class="settings-section">
+      <h3>Dzikir Utama</h3>
+      <div class="settings-card">
+        <div>
+          <label style="font-size:0.75rem; color:var(--text3);">Bacaan (Arab):</label>
+          <textarea class="setting-textarea" id="set-dzikir-arabic" rows="2"></textarea>
+        </div>
+        <div>
+          <label style="font-size:0.75rem; color:var(--text3);">Transliterasi:</label>
+          <textarea class="setting-textarea setting-textarea-latin" id="set-dzikir-latin" rows="1"></textarea>
+        </div>
+        <div class="setting-row">
+          <label>Hitungan per Set:</label>
+          <input type="number" id="set-count-per-set" min="1" max="9999">
+        </div>
+        <div class="setting-row">
+          <label>Jumlah Set:</label>
+          <input type="number" id="set-total-sets" min="1" max="9999">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Bacaan Antar Set</h3>
+      <div class="settings-card">
+        <div>
+          <label style="font-size:0.75rem; color:var(--text3);">Bacaan (Arab):</label>
+          <textarea class="setting-textarea" id="set-antar-arabic" rows="3"></textarea>
+        </div>
+        <div>
+          <label style="font-size:0.75rem; color:var(--text3);">Transliterasi:</label>
+          <textarea class="setting-textarea setting-textarea-latin" id="set-antar-latin" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Doa Pembuka</h3>
+      <div class="settings-card">
+        <div>
+          <textarea class="setting-textarea" id="set-doa-pembuka-arabic" rows="4"></textarea>
+        </div>
+        <div>
+          <textarea class="setting-textarea setting-textarea-latin" id="set-doa-pembuka-latin" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Doa Hajat</h3>
+      <div class="settings-card">
+        <div>
+          <textarea class="setting-textarea" id="set-doa-hajat" rows="5" placeholder="Ketik doa hajat..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Sholawat</h3>
+      <div class="settings-card">
+        <div class="setting-row">
+          <label>Jumlah:</label>
+          <input type="number" id="set-sholawat-count" min="1" max="9999">
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Lainnya</h3>
+      <div class="settings-card">
+        <div class="toggle-row">
+          <label style="font-size:0.85rem; color:var(--text2);">Getaran</label>
+          <div class="toggle on" id="toggle-vibrate" onclick="toggleVibrate()"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:10px 0 30px;">
+      <button class="btn-gold" style="width:100%;" onclick="saveSettings()">💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+const SHOLAWAT_OPTIONS = [
+  {
+    id: 'ibrahim',
+    name: 'Sholawat Ibrahim',
+    arabic: 'اَللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيْمَ وَعَلَى آلِ إِبْرَاهِيْمَ إِنَّكَ حَمِيْدٌ مَجِيْدٌ اَللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيْمَ وَعَلَى آلِ إِبْرَاهِيْمَ إِنَّكَ حَمِيْدٌ مَجِيْدٌ',
+    latin: "Allāhumma ṣalli 'alā Muḥammadin wa 'alā āli Muḥammadin kamā ṣallaita 'alā Ibrāhīma wa 'alā āli Ibrāhīma innaka ḥamīdum majīd. Allāhumma bārik 'alā Muḥammadin wa 'alā āli Muḥammadin kamā bārakta 'alā Ibrāhīma wa 'alā āli Ibrāhīma innaka ḥamīdum majīd."
+  },
+  {
+    id: 'nariyah',
+    name: 'Sholawat Nariyah',
+    arabic: 'اَللَّهُمَّ صَلِّ صَلَاةً كَامِلَةً وَسَلِّمْ سَلَامًا تَامًّا عَلَى سَيِّدِنَا مُحَمَّدٍ الَّذِي تَنْحَلُّ بِهِ الْعُقَدُ وَتَنْفَرِجُ بِهِ الْكُرَبُ وَتُقْضَى بِهِ الْحَوَائِجُ وَتُنَالُ بِهِ الرَّغَائِبُ وَحُسْنُ الْخَوَاتِمِ وَيُسْتَسْقَى الْغَمَامُ بِوَجْهِهِ الْكَرِيْمِ وَعَلَى آلِهِ وَصَحْبِهِ فِي كُلِّ لَمْحَةٍ وَنَفَسٍ بِعَدَدِ كُلِّ مَعْلُوْمٍ لَكَ',
+    latin: "Allāhumma ṣalli ṣalātan kāmilatan wa sallim salāman tāmman 'alā sayyidinā Muḥammadini'l-ladzī tanḥallu bihil-'uqadu wa tanfariju bihil-kurabu wa tuqḍā bihil-ḥawā'iju wa tunālu bihir-raghā'ibu wa ḥusnul-khawātimi wa yustasqal-ghamāmu bi wajhihil-karīmi wa 'alā ālihī wa ṣaḥbihī fī kulli lamḥatin wa nafasin bi 'adadi kulli ma'lūmil lak."
+  },
+  {
+    id: 'simple',
+    name: 'Sholawat Pendek',
+    arabic: 'اَللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى سَيِّدِنَا مُحَمَّدٍ وَعَلَى آلِ سَيِّدِنَا مُحَمَّدٍ',
+    latin: "Allāhumma ṣalli wa sallim 'alā sayyidinā Muḥammadin wa 'alā āli sayyidinā Muḥammad."
+  },
+  {
+    id: 'thibbil',
+    name: 'Sholawat Thibbil Qulub',
+    arabic: 'اَللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى سَيِّدِنَا مُحَمَّدٍ طِبِّ الْقُلُوْبِ وَدَوَائِهَا وَعَافِيَةِ الْأَبْدَانِ وَشِفَائِهَا وَنُوْرِ الْأَبْصَارِ وَضِيَائِهَا وَعَلَى آلِهِ وَصَحْبِهِ وَسَلِّمْ',
+    latin: "Allāhumma ṣalli wa sallim 'alā sayyidinā Muḥammadin ṭibbil-qulūbi wa dawā'ihā wa 'āfiyatil-abdāni wa syifā'ihā wa nūril-abṣāri wa ḍiyā'ihā wa 'alā ālihī wa ṣaḥbihī wa sallim."
+  }
+];
+
+const DEFAULT_CONFIG = {
+  dzikir: {
+    arabic: 'يَا لَطِيْفُ',
+    latin: 'Yā Laṭīf',
+    countPerSet: 129,
+    totalSets: 129
+  },
+  antarSet: {
+    arabic: 'اَللّٰهُ لَطِيْفٌۢ بِعِبَادِهٖ يَرْزُقُ مَنْ يَّشَاۤءُ ۚ وَهُوَ الْقَوِيُّ الْعَزِيْزُ',
+    latin: "Allāhu laṭīfum bi'ibādihī yarzuqu may yasyā', wa huwal-qawiyyul-'azīz."
+  },
+  doaPembuka: {
+    arabic: 'اَللَّهُمَّ إِنِّي أَسْأَلُكَ بِأَنِّي أَشْهَدُ أَنَّكَ أَنْتَ اللهُ لَا إِلَهَ إِلَّا أَنْتَ الأَحَدُ الصَّمَدُ الَّذِي لَمْ يَلِدْ وَلَمْ يُولَدْ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ',
+    latin: 'Allāhumma innī as\'aluka bi annī asyhadu annaka antallāhu, lā ilāha illā antal-aḥaduṣ-ṣamad, alladhī lam yalid wa lam yūlad, wa lam yakul lahū kufuwan aḥad.'
+  },
+  doaHajat: '',
+  sholawat: {
+    selectedId: 'ibrahim',
+    count: 11
+  },
+  vibrate: true
+};
+
+// ============ STATE ============
+let config = {};
+let state = {
+  phase: 'idle', // idle, doa-pembuka, counter, doa-hajat, sholawat-select, sholawat-counter, finish
+  currentCount: 0,
+  currentSet: 0,
+  sholawatCount: 0,
+  startTime: null
+};
+
+// ============ INIT ============
+function init() {
+  loadConfig();
+  loadState();
+  checkResume();
+}
+
+function loadConfig() {
+  const saved = localStorage.getItem('dzikir-config');
+  if (saved) {
+    config = JSON.parse(saved);
+    // Merge with defaults for any missing keys
+    config = { ...DEFAULT_CONFIG, ...config };
+    config.dzikir = { ...DEFAULT_CONFIG.dzikir, ...config.dzikir };
+    config.antarSet = { ...DEFAULT_CONFIG.antarSet, ...config.antarSet };
+    config.doaPembuka = { ...DEFAULT_CONFIG.doaPembuka, ...config.doaPembuka };
+    config.sholawat = { ...DEFAULT_CONFIG.sholawat, ...config.sholawat };
+  } else {
+    config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+  }
+}
+
+function saveConfig() {
+  localStorage.setItem('dzikir-config', JSON.stringify(config));
+}
+
+function loadState() {
+  const saved = localStorage.getItem('dzikir-state');
+  if (saved) {
+    state = JSON.parse(saved);
+  }
+}
+
+function saveState() {
+  localStorage.setItem('dzikir-state', JSON.stringify(state));
+}
+
+function clearState() {
+  state = {
+    phase: 'idle',
+    currentCount: 0,
+    currentSet: 0,
+    sholawatCount: 0,
+    startTime: null
+  };
+  localStorage.removeItem('dzikir-state');
+}
+
+function checkResume() {
+  if (state.phase !== 'idle' && state.phase !== 'finish') {
+    const resumeSection = document.getElementById('resume-section');
+    const resumeInfo = document.getElementById('resume-info');
+    resumeSection.style.display = 'block';
+
+    if (state.phase === 'counter') {
+      resumeInfo.textContent = `Set ${state.currentSet + 1}/${config.dzikir.totalSets}, Hitungan ${state.currentCount}/${config.dzikir.countPerSet}`;
+    } else if (state.phase === 'sholawat-counter') {
+      resumeInfo.textContent = `Sholawat: ${state.sholawatCount}/${config.sholawat.count}`;
+    } else {
+      resumeInfo.textContent = `Tahap: ${state.phase}`;
+    }
+  }
+}
+
+// ============ NAVIGATION ============
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startNew() {
+  clearState();
+  state.phase = 'doa-pembuka';
+  state.startTime = Date.now();
+  saveState();
+  renderDoaPembuka();
+  showScreen('screen-doa-pembuka');
+}
+
+function resumeDzikir() {
+  document.getElementById('resume-section').style.display = 'none';
+  switch(state.phase) {
+    case 'doa-pembuka':
+      renderDoaPembuka();
+      showScreen('screen-doa-pembuka');
+      break;
+    case 'counter':
+      renderCounter();
+      showScreen('screen-counter');
+      break;
+    case 'doa-hajat':
+      renderDoaHajat();
+      showScreen('screen-doa-hajat');
+      break;
+    case 'sholawat-select':
+      renderSholawatSelector();
+      showScreen('screen-sholawat-select');
+      break;
+    case 'sholawat-counter':
+      renderSholawatCounter();
+      showScreen('screen-sholawat-counter');
+      break;
+  }
+}
+
+function confirmRestart() {
+  if (confirm('Yakin ingin mulai ulang? Progress akan hilang.')) {
+    clearState();
+    document.getElementById('resume-section').style.display = 'none';
+  }
+}
+
+// ============ DOA PEMBUKA ============
+function renderDoaPembuka() {
+  document.getElementById('doa-pembuka-arabic').textContent = config.doaPembuka.arabic;
+  document.getElementById('doa-pembuka-latin').textContent = config.doaPembuka.latin;
+}
+
+// ============ MAIN COUNTER ============
+function startCounter() {
+  state.phase = 'counter';
+  state.currentCount = 0;
+  state.currentSet = 0;
+  saveState();
+  renderCounter();
+  showScreen('screen-counter');
+}
+
+function renderCounter() {
+  document.getElementById('counter-arabic').textContent = config.dzikir.arabic;
+  document.getElementById('counter-latin').textContent = config.dzikir.latin;
+  document.getElementById('counter-step-label').textContent = 'Dzikir';
+  updateCounterDisplay();
+}
+
+function updateCounterDisplay() {
+  document.getElementById('count-display').textContent = state.currentCount;
+  document.getElementById('count-target').textContent = '/' + config.dzikir.countPerSet;
+  document.getElementById('set-display').textContent = (state.currentSet + 1) + '/' + config.dzikir.totalSets;
+
+  const totalTaps = config.dzikir.countPerSet * config.dzikir.totalSets;
+  const doneTaps = state.currentSet * config.dzikir.countPerSet + state.currentCount;
+  const pct = Math.round((doneTaps / totalTaps) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = pct + '% • ' + doneTaps.toLocaleString() + ' / ' + totalTaps.toLocaleString();
+}
+
+// Tap handler for main counter
+document.getElementById('tap-area').addEventListener('click', function(e) {
+  if (state.phase !== 'counter') return;
+
+  state.currentCount++;
+  doVibrate();
+  animateTap('counter-circle');
+  createRipple(e, this);
+
+  if (state.currentCount >= config.dzikir.countPerSet) {
+    // Lap/Set selesai — tampilkan bacaan antar set SELALU
+    saveState();
+    updateCounterDisplay();
+    showAntarSet();
+  } else {
+    saveState();
+    updateCounterDisplay();
+  }
+});
+
+function showAntarSet() {
+  document.getElementById('set-complete-title').textContent = 
+    'Set ' + (state.currentSet + 1) + '/' + config.dzikir.totalSets + ' Selesai!';
+  document.getElementById('antar-set-arabic').textContent = config.antarSet.arabic;
+  document.getElementById('antar-set-latin').textContent = config.antarSet.latin;
+  document.getElementById('overlay-set').classList.add('active');
+}
+
+function nextSet() {
+  state.currentSet++;
+  document.getElementById('overlay-set').classList.remove('active');
+
+  if (state.currentSet >= config.dzikir.totalSets) {
+    // SEMUA SET SELESAI → lanjut doa hajat
+    state.phase = 'doa-hajat';
+    state.currentCount = 0;
+    saveState();
+    renderDoaHajat();
+    showScreen('screen-doa-hajat');
+  } else {
+    // Masih ada set berikutnya → reset counter, lanjut
+    state.currentCount = 0;
+    saveState();
+    updateCounterDisplay();
+  }
+}
+
+function showAllSetsComplete() {
+  // Proceed to doa hajat after short delay
+  setTimeout(() => {
+    state.phase = 'doa-hajat';
+    saveState();
+    renderDoaHajat();
+    showScreen('screen-doa-hajat');
+  }, 500);
+}
+
+// ============ PAUSE ============
+function pauseDzikir() {
+  const stats = document.getElementById('pause-stats');
+  if (state.phase === 'counter') {
+    stats.innerHTML = `
+      <span>Set: ${state.currentSet + 1}/${config.dzikir.totalSets}</span>
+      <span>Hitungan: ${state.currentCount}/${config.dzikir.countPerSet}</span>
+      <span>Progress: ${Math.round(((state.currentSet * config.dzikir.countPerSet + state.currentCount) / (config.dzikir.countPerSet * config.dzikir.totalSets)) * 100)}%</span>
+    `;
+  } else if (state.phase === 'sholawat-counter') {
+    stats.innerHTML = `
+      <span>Sholawat: ${state.sholawatCount}/${config.sholawat.count}</span>
+    `;
+  }
+  document.getElementById('overlay-pause').classList.add('active');
+}
+
+function closePause() {
+  document.getElementById('overlay-pause').classList.remove('active');
+  hideResetConfirm();
+}
+
+function goHome() {
+  saveState();
+  document.getElementById('overlay-pause').classList.remove('active');
+  hideResetConfirm();
+  document.getElementById('resume-section').style.display = 'none';
+  checkResume();
+  showScreen('screen-home');
+}
+
+function showResetConfirm() {
+  document.getElementById('reset-confirm').style.display = 'block';
+  document.getElementById('btn-reset-all').style.display = 'none';
+}
+
+function hideResetConfirm() {
+  document.getElementById('reset-confirm').style.display = 'none';
+  document.getElementById('btn-reset-all').style.display = 'block';
+}
+
+function resetAll() {
+  clearState();
+  document.getElementById('overlay-pause').classList.remove('active');
+  document.getElementById('resume-section').style.display = 'none';
+  showScreen('screen-home');
+}
+
+// ============ DOA HAJAT ============
+function renderDoaHajat() {
+  document.getElementById('doa-hajat-display').value = config.doaHajat || '(Silakan isi doa hajat di Pengaturan)';
+}
+
+// ============ SHOLAWAT ============
+function startSholawat() {
+  state.phase = 'sholawat-select';
+  saveState();
+  renderSholawatSelector();
+  showScreen('screen-sholawat-select');
+}
+
+function renderSholawatSelector() {
+  const list = document.getElementById('sholawat-list');
+  list.innerHTML = '';
+  SHOLAWAT_OPTIONS.forEach(opt => {
+    const div = document.createElement('div');
+    div.className = 'sholawat-option' + (config.sholawat.selectedId === opt.id ? ' selected' : '');
+    div.onclick = () => selectSholawat(opt.id);
+    div.innerHTML = `
+      <h4>${opt.name}</h4>
+      <div class="arabic" style="font-size:1.1rem;">${opt.arabic}</div>
+      <div class="latin" style="font-size:0.75rem; margin-top:6px;">${opt.latin}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function selectSholawat(id) {
+  config.sholawat.selectedId = id;
+  saveConfig();
+  renderSholawatSelector();
+}
+
+function beginSholawatCounter() {
+  state.phase = 'sholawat-counter';
+  state.sholawatCount = 0;
+  saveState();
+  renderSholawatCounter();
+  showScreen('screen-sholawat-counter');
+}
+
+function renderSholawatCounter() {
+  const opt = SHOLAWAT_OPTIONS.find(o => o.id === config.sholawat.selectedId) || SHOLAWAT_OPTIONS[0];
+  document.getElementById('sholawat-counter-arabic').textContent = opt.arabic;
+  document.getElementById('sholawat-counter-latin').textContent = opt.latin;
+  updateSholawatDisplay();
+}
+
+function updateSholawatDisplay() {
+  document.getElementById('sholawat-count-display').textContent = state.sholawatCount;
+  document.getElementById('sholawat-count-target').textContent = '/' + config.sholawat.count;
+  const pct = Math.round((state.sholawatCount / config.sholawat.count) * 100);
+  document.getElementById('sholawat-progress-fill').style.width = pct + '%';
+  document.getElementById('sholawat-progress-text').textContent = pct + '%';
+}
+
+// Tap handler for sholawat
+document.getElementById('sholawat-tap-area').addEventListener('click', function(e) {
+  if (state.phase !== 'sholawat-counter') return;
+
+  state.sholawatCount++;
+  doVibrate();
+  animateTap('sholawat-circle');
+  createRipple(e, this);
+
+  if (state.sholawatCount >= config.sholawat.count) {
+    saveState();
+    updateSholawatDisplay();
+    setTimeout(() => showFinish(), 500);
+  } else {
+    saveState();
+    updateSholawatDisplay();
+  }
+});
+
+// ============ FINISH ============
+function showFinish() {
+  state.phase = 'finish';
+  saveState();
+
+  const elapsed = state.startTime ? Date.now() - state.startTime : 0;
+  const mins = Math.round(elapsed / 60000);
+  const totalTaps = config.dzikir.countPerSet * config.dzikir.totalSets + config.sholawat.count;
+
+  document.getElementById('finish-stats').innerHTML = `
+    <span>⏱ Waktu: ${mins > 0 ? mins + ' menit' : '< 1 menit'}</span>
+    <span>📿 Total tap: ${totalTaps.toLocaleString()}</span>
+  `;
+
+  showScreen('screen-finish');
+}
+
+function goHomeClean() {
+  clearState();
+  document.getElementById('resume-section').style.display = 'none';
+  showScreen('screen-home');
+}
+
+// ============ SETTINGS ============
+function showSettingsScreen() {
+  // Populate fields
+  document.getElementById('set-dzikir-arabic').value = config.dzikir.arabic;
+  document.getElementById('set-dzikir-latin').value = config.dzikir.latin;
+  document.getElementById('set-count-per-set').value = config.dzikir.countPerSet;
+  document.getElementById('set-total-sets').value = config.dzikir.totalSets;
+  document.getElementById('set-antar-arabic').value = config.antarSet.arabic;
+  document.getElementById('set-antar-latin').value = config.antarSet.latin;
+  document.getElementById('set-doa-pembuka-arabic').value = config.doaPembuka.arabic;
+  document.getElementById('set-doa-pembuka-latin').value = config.doaPembuka.latin;
+  document.getElementById('set-doa-hajat').value = config.doaHajat;
+  document.getElementById('set-sholawat-count').value = config.sholawat.count;
+
+  const vibToggle = document.getElementById('toggle-vibrate');
+  vibToggle.className = 'toggle' + (config.vibrate ? ' on' : '');
+
+  showScreen('screen-settings');
+}
+
+// Override settings button
+document.querySelector('[onclick="showScreen(\'screen-settings\')"]').onclick = function() {
+  showSettingsScreen();
+};
+
+function toggleVibrate() {
+  config.vibrate = !config.vibrate;
+  const el = document.getElementById('toggle-vibrate');
+  el.className = 'toggle' + (config.vibrate ? ' on' : '');
+}
+
+function saveSettings() {
+  config.dzikir.arabic = document.getElementById('set-dzikir-arabic').value;
+  config.dzikir.latin = document.getElementById('set-dzikir-latin').value;
+  config.dzikir.countPerSet = parseInt(document.getElementById('set-count-per-set').value) || 129;
+  config.dzikir.totalSets = parseInt(document.getElementById('set-total-sets').value) || 129;
+  config.antarSet.arabic = document.getElementById('set-antar-arabic').value;
+  config.antarSet.latin = document.getElementById('set-antar-latin').value;
+  config.doaPembuka.arabic = document.getElementById('set-doa-pembuka-arabic').value;
+  config.doaPembuka.latin = document.getElementById('set-doa-pembuka-latin').value;
+  config.doaHajat = document.getElementById('set-doa-hajat').value;
+  config.sholawat.count = parseInt(document.getElementById('set-sholawat-count').value) || 11;
+
+  saveConfig();
+  showScreen('screen-home');
+}
+
+// ============ UTILS ============
+function doVibrate() {
+  if (config.vibrate && navigator.vibrate) {
+    navigator.vibrate(30);
+  }
+}
+
+function animateTap(circleId) {
+  const el = document.getElementById(circleId);
+  el.classList.add('tapped');
+  setTimeout(() => el.classList.remove('tapped'), 120);
+}
+
+function createRipple(e, container) {
+  const ripple = document.createElement('div');
+  ripple.className = 'ripple';
+  const rect = container.getBoundingClientRect();
+  ripple.style.left = (e.clientX - rect.left) + 'px';
+  ripple.style.top = (e.clientY - rect.top) + 'px';
+  container.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+}
+
+// ============ PREVENT ZOOM ============
+document.addEventListener('dblclick', e => e.preventDefault());
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e) {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, false);
+
+// ============ WAKE LOCK (keep screen on) ============
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.phase === 'counter') {
+    requestWakeLock();
+  }
+});
+
+// ============ START ============
+init();
+</script>
+</body>
+</html>
