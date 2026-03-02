@@ -1361,8 +1361,55 @@ function saveSettings() {
 }
 
 // ============ UTILS ============
+// Bikin context audio (cuma dipanggil sekali biar ringan)
+let audioCtx = null;
+
+function playClickSound() {
+  // Inisialisasi audio context saat pertama kali diklik
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  // Resume kalau statusnya suspended (aturan browser)
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+
+  // Bikin suara "tak" pendek (oscillator)
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  // Setelan biar suaranya mirip tasbih/kayu (frekuensi turun cepat)
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.03);
+
+  // Setelan volume (mengecil dengan cepat biar jadi bunyi "klik")
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.03);
+}
+
 function doVibrate() {
-  if (config.vibrate && navigator.vibrate) {
+  if (!config.vibrate) return;
+
+  // 1. Mainkan suara klik setiap kali dipencet
+  playClickSound();
+
+  // 2. Native Android bridge (dari APK) - best haptic
+  if (window.AndroidBridge) {
+    try {
+      AndroidBridge.vibrateClick();
+      return;
+    } catch(e) {}
+  }
+
+  // 3. Fallback: Web API (Buat browser biasa kalau HP ngijinin getar)
+  if (navigator.vibrate) {
     navigator.vibrate(30);
   }
 }
